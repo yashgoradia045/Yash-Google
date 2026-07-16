@@ -1,0 +1,6 @@
+{
+  "name": "Brandline Merch Shop",
+  "description": "High-fidelity UX, trust, and conversion-optimized prototype for the Brandline Merch Shop e-commerce platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
