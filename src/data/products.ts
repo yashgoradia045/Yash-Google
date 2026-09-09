@@ -154,8 +154,8 @@ export const PRODUCTS: Product[] = [
     category: 'Lifestyle',
     subcategory: 'Fun and Games',
     images: [
-      'https://images.unsplash.com/photo-1606168094336-48f205276929?w=600&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1515260268569-9271009adfdb?w=600&auto=format&fit=crop&q=80'
+      '/images/handcrafted-wooden-brainteaser.jpg',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:8KNc5kuec8-VFM'
     ],
     colors: [
       { name: 'Natural Cherry & Walnut', hex: '#854D0E' }
@@ -211,8 +211,8 @@ export const PRODUCTS: Product[] = [
     category: 'Stationery',
     subcategory: 'Stickers',
     images: [
-      'https://images.unsplash.com/photo-1572945281861-68b143026a5a?w=600&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1589384267710-7a259678a59a?w=600&auto=format&fit=crop&q=80'
+      '/images/die-cut-tech-vinyl-sticker-pack.jpg',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:OOivdoHIqOW_sM'
     ],
     colors: [
       { name: 'Glossy Pack (12 stickers)', hex: '#3B82F6' }
@@ -232,8 +232,8 @@ export const PRODUCTS: Product[] = [
     category: 'Stationery',
     subcategory: 'Greeting Cards',
     images: [
-      'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=600&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=600&auto=format&fit=crop&q=80'
+      '/images/recycled-kraft-greeting-cards.jpg',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:xZZK8oHVFkkZ-M'
     ],
     colors: [
       { name: 'Kraft Brown', hex: '#C2A385' }
@@ -351,8 +351,8 @@ export const PRODUCTS: Product[] = [
     category: 'New',
     subcategory: 'Stickers',
     images: [
-      'https://images.unsplash.com/photo-1572945281861-68b143026a5a?w=600&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1589384267710-7a259678a59a?w=600&auto=format&fit=crop&q=80'
+      '/images/android-bot-holographic-sticker.jpg',
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:_BocWjPQpmN08M'
     ],
     colors: [
       { name: 'Holo Multi-Pack', hex: '#3B82F6' }
@@ -370,8 +370,8 @@ export const PRODUCTS: Product[] = [
     category: 'New',
     subcategory: 'Drinkware',
     images: [
-      'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=600&auto=format&fit=crop&q=80'
+      '/images/double-wall-insulated-coffee-mug.jpg',
+      '/images/double-wall-insulated-coffee-mug-2.jpg'
     ],
     colors: [
       { name: 'Matte Obsidian', hex: '#1F2937' },

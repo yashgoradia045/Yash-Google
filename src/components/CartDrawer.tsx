@@ -1,6 +1,6 @@
 import React from 'react';
 import { CartItem } from '../types';
-import { X, ShoppingBag, Trash2, Plus, Minus, Check, Gift } from 'lucide-react';
+import { X, ShoppingBag, Trash2, Plus, Minus, Check, Gift, Tag, ArrowRight, ShieldCheck } from 'lucide-react';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -9,6 +9,9 @@ interface CartDrawerProps {
   onUpdateQuantity: (id: string, quantity: number, color?: string, size?: string) => void;
   onRemoveItem: (id: string, color?: string, size?: string) => void;
   onClearCart: () => void;
+  onOpenCheckoutModal: () => void;
+  promoCodeApplied: string | null;
+  onApplyPromoCode: (code: string) => void;
 }
 
 const SHIPPING_THRESHOLD = 50;
@@ -19,33 +22,35 @@ export default function CartDrawer({
   cartItems,
   onUpdateQuantity,
   onRemoveItem,
-  onClearCart
+  onClearCart,
+  onOpenCheckoutModal,
+  promoCodeApplied,
+  onApplyPromoCode
 }: CartDrawerProps) {
-  const [isCheckingOut, setIsCheckingOut] = React.useState(false);
-  const [checkoutComplete, setCheckoutComplete] = React.useState(false);
+  const [couponInput, setCouponInput] = React.useState('');
+  const [couponError, setCouponError] = React.useState(false);
 
   if (!isOpen) return null;
 
   // Calculate Subtotal (considering sales)
-  const subtotal = cartItems.reduce((acc, item) => {
+  const rawSubtotal = cartItems.reduce((acc, item) => {
     const itemPrice = item.product.isSale && item.product.salePrice ? item.product.salePrice : item.product.price;
     return acc + itemPrice * item.quantity;
   }, 0);
 
+  const discountAmount = promoCodeApplied ? rawSubtotal * 0.10 : 0;
+  const subtotal = rawSubtotal - discountAmount;
+
   const shippingRemaining = Math.max(0, SHIPPING_THRESHOLD - subtotal);
   const percentToFreeShipping = Math.min(100, (subtotal / SHIPPING_THRESHOLD) * 100);
 
-  const handleCheckout = () => {
-    setIsCheckingOut(true);
-    setTimeout(() => {
-      setIsCheckingOut(false);
-      setCheckoutComplete(true);
-      setTimeout(() => {
-        setCheckoutComplete(false);
-        onClearCart();
-        onClose();
-      }, 3000);
-    }, 1500);
+  const handleApplyCoupon = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (couponInput.trim()) {
+      onApplyPromoCode(couponInput.trim());
+      setCouponInput('');
+      setCouponError(false);
+    }
   };
 
   return (
@@ -72,32 +77,7 @@ export default function CartDrawer({
             </button>
           </div>
 
-          {/* Checkout Success Screen overlay */}
-          {checkoutComplete ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-blue-50/50 animate-in fade-in duration-300">
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4 text-emerald-600 shadow-md">
-                <Check className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">Order Confirmed!</h3>
-              <p className="text-xs text-slate-500 mt-2 max-w-xs leading-relaxed font-medium">
-                Thank you for purchasing! Since this is an interactive design prototype, no payment was processed. Your mock order will ship shortly.
-              </p>
-              <div className="mt-6 bg-white border border-slate-200 rounded-xl p-4 shadow-xs text-left max-w-xs space-y-2">
-                <div className="flex justify-between text-[11px] text-slate-500">
-                  <span>Ship To:</span>
-                  <span className="font-semibold text-slate-800">Yash Goradia</span>
-                </div>
-                <div className="flex justify-between text-[11px] text-slate-500">
-                  <span>Method:</span>
-                  <span className="font-semibold text-emerald-600">Standard Eco Shipping (Free)</span>
-                </div>
-                <div className="flex justify-between text-[11px] text-slate-500 border-t border-slate-200 pt-2 font-bold text-slate-800">
-                  <span>Total Saved:</span>
-                  <span>${subtotal.toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-          ) : cartItems.length === 0 ? (
+          {cartItems.length === 0 ? (
             /* Empty state */
             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
               <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400 border border-slate-200">
@@ -222,43 +202,82 @@ export default function CartDrawer({
 
               {/* Subtotal and checkout action container */}
               <div className="px-6 py-5 bg-slate-50 border-t border-slate-200 space-y-4">
+                
+                {/* Promo Code Input */}
+                <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value)}
+                      placeholder="Promo Code (e.g. RAKHI10)"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-blue-500 uppercase"
+                    />
+                    <Tag className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-2.5" />
+                  </div>
+                  <button
+                    type="submit"
+                    className="bg-slate-900 hover:bg-blue-600 text-white text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded-xl transition-colors shrink-0"
+                  >
+                    Apply
+                  </button>
+                </form>
+
+                {/* Applied Promo Code Badge */}
+                {promoCodeApplied && (
+                  <div className="bg-rose-50 border border-rose-200 rounded-xl p-2.5 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5 text-rose-700 font-bold">
+                      <Tag className="w-3.5 h-3.5 text-rose-500" />
+                      <span>10% Discount Applied ({promoCodeApplied})</span>
+                    </div>
+                    <span className="text-rose-600 font-mono font-black">-${discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
+
                 <div className="space-y-1.5 text-xs">
                   <div className="flex justify-between text-slate-500">
-                    <span>Cart Subtotal</span>
-                    <span className="font-bold text-slate-900">${subtotal.toFixed(2)}</span>
+                    <span>Subtotal</span>
+                    <span className="font-bold text-slate-900">${rawSubtotal.toFixed(2)}</span>
                   </div>
+
+                  {promoCodeApplied && (
+                    <div className="flex justify-between text-rose-600 font-bold">
+                      <span>Promo Discount</span>
+                      <span>-${discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+
                   <div className="flex justify-between text-slate-500">
                     <span>Standard Shipping</span>
                     {shippingRemaining === 0 ? (
-                      <span className="text-emerald-600 font-bold uppercase tracking-wide">Free</span>
+                      <span className="text-emerald-600 font-bold uppercase tracking-wide">FREE</span>
                     ) : (
                       <span className="font-bold text-slate-900">$5.00</span>
                     )}
                   </div>
-                  <div className="flex justify-between text-slate-500 border-t border-slate-200/60 pt-2 font-bold text-sm text-slate-800">
-                    <span>Estimated Total</span>
+
+                  <div className="flex justify-between text-slate-500 border-t border-slate-200/60 pt-2 font-black text-sm text-slate-900">
+                    <span>Total Due</span>
                     <span className="text-blue-600">${(subtotal + (shippingRemaining === 0 ? 0 : 5)).toFixed(2)}</span>
                   </div>
                 </div>
 
                 <button
-                  onClick={handleCheckout}
-                  disabled={isCheckingOut}
-                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-450 text-white text-xs font-bold tracking-wide uppercase py-4 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 focus:outline-hidden"
+                  onClick={() => {
+                    onClose();
+                    onOpenCheckoutModal();
+                  }}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold tracking-wider uppercase py-4 rounded-2xl transition-all shadow-md hover:scale-102 flex items-center justify-center gap-2 focus:outline-hidden"
                   id="checkout-btn"
                 >
-                  {isCheckingOut ? (
-                    <>
-                      <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      <span>Processing Checkout...</span>
-                    </>
-                  ) : (
-                    <span>Proceed to Simulated Checkout</span>
-                  )}
+                  <span>Proceed to Express Checkout</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
+
+                <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 font-medium">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>256-Bit SSL Encrypted • Fast Guest Checkout</span>
+                </div>
               </div>
             </>
           )}

@@ -10,7 +10,12 @@ import SidebarFilters from './components/SidebarFilters';
 import CartDrawer from './components/CartDrawer';
 import WishlistDrawer from './components/WishlistDrawer';
 import ComparisonPanel from './components/ComparisonPanel';
+import ExpressCheckoutModal from './components/ExpressCheckoutModal';
+import ExitIntentModal from './components/ExitIntentModal';
+import FloatingCartBar from './components/FloatingCartBar';
+import FrequentlyBoughtTogether from './components/FrequentlyBoughtTogether';
 import { Sparkles, ArrowRight, ShieldCheck, Heart, ShoppingBag, Grid, AlertTriangle, ChevronRight, HelpCircle, Info } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 const INITIAL_FILTERS: FilterState = {
   categories: [],
@@ -32,6 +37,33 @@ export default function App() {
   const [wishlist, setWishlist] = React.useState<Product[]>([]);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = React.useState(false);
+  
+  // CRO Express Checkout & Exit-Intent Promo States
+  const [isCheckoutOpen, setIsCheckoutOpen] = React.useState(false);
+  const [isExitIntentOpen, setIsExitIntentOpen] = React.useState(false);
+  const [exitIntentTriggered, setExitIntentTriggered] = React.useState(false);
+  const [promoCodeApplied, setPromoCodeApplied] = React.useState<string | null>(null);
+
+  // Exit-intent mouse leave detector
+  React.useEffect(() => {
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 5 && cart.length > 0 && !exitIntentTriggered && !isCheckoutOpen) {
+        setIsExitIntentOpen(true);
+        setExitIntentTriggered(true);
+      }
+    };
+    document.addEventListener('mouseleave', handleMouseLeave);
+    return () => document.removeEventListener('mouseleave', handleMouseLeave);
+  }, [cart.length, exitIntentTriggered, isCheckoutOpen]);
+
+  // Handle Bundle Addition to Cart
+  const handleAddBundleToCart = (products: Product[]) => {
+    products.forEach((prod) => {
+      handleAddToCart(prod, prod.colors[0], prod.sizes[0]);
+    });
+    setPromoCodeApplied('BUNDLE10');
+    setIsCartOpen(true);
+  };
 
   // Search & Filter States
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -319,80 +351,105 @@ export default function App() {
             />
 
             {/* Quick Link Category Rails */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-              <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-                <span className="text-xs font-black uppercase tracking-wider text-blue-600">Quick Department Rails</span>
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                className="text-center max-w-2xl mx-auto mb-10 sm:mb-14"
+              >
+                <div className="inline-flex items-center gap-2 mb-2 text-[10px] font-mono tracking-[0.2em] uppercase text-slate-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#e10600]"></span>
+                  <span>ENGINEERED CATEGORIES</span>
+                </div>
+                <span className="text-xs font-black uppercase tracking-wider text-[#e10600] block">Quick Department Rails</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1 font-display">
                   Crafted Merchandise Ecosystem
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-2 font-medium">
+                <p className="text-xs sm:text-sm text-slate-500 mt-2 font-normal">
                   Select from our audited, premium departments engineered for exceptional longevity.
                 </p>
-              </div>
+              </motion.div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
                 {/* Apparel Card */}
-                <button
+                <motion.button
+                  initial={{ opacity: 0, y: 25 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.65, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
                   onClick={() => handleExploreFromPromo('Apparel')}
-                  className="group rounded-2xl overflow-hidden aspect-video relative text-left border border-slate-200 shadow-xs focus:outline-hidden hover:shadow-lg transition-all animate-in fade-in"
+                  className="group rounded-2xl overflow-hidden aspect-video relative text-left border border-slate-200/90 shadow-xs focus:outline-hidden hover:shadow-[0_20px_40px_-15px_rgba(225,6,0,0.15)] hover:border-slate-300 hover:-translate-y-1.5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 >
+                  <span className="absolute top-0 left-0 w-0 h-[2.5px] bg-[#e10600] group-hover:w-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-30"></span>
                   <img
                     src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&auto=format&fit=crop&q=80"
                     alt="Apparel department"
-                    className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/30 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
                   <div className="absolute bottom-5 left-5 text-white">
-                    <span className="text-[10px] uppercase tracking-wider font-extrabold text-blue-300">Sustainable Wear</span>
-                    <h3 className="text-base sm:text-lg font-extrabold mt-0.5">Organic Apparel</h3>
-                    <span className="text-xs font-semibold text-slate-200 mt-2 flex items-center gap-1 group-hover:text-blue-200">
-                      Shop Collection <ChevronRight className="w-3.5 h-3.5" />
+                    <span className="text-[10px] uppercase tracking-wider font-black text-red-300">Sustainable Wear</span>
+                    <h3 className="text-base sm:text-lg font-black mt-0.5 font-display">Organic Apparel</h3>
+                    <span className="text-xs font-semibold text-slate-200 mt-2 flex items-center gap-1 group-hover:text-red-200 transition-colors">
+                      Shop Collection <ChevronRight className="w-3.5 h-3.5 text-[#e10600] group-hover:translate-x-1.5 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]" />
                     </span>
                   </div>
-                </button>
+                </motion.button>
 
                 {/* Lifestyle Card */}
-                <button
+                <motion.button
+                  initial={{ opacity: 0, y: 25 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.65, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
                   onClick={() => handleExploreFromPromo('Lifestyle')}
-                  className="group rounded-2xl overflow-hidden aspect-video relative text-left border border-slate-200 shadow-xs focus:outline-hidden hover:shadow-lg transition-all animate-in fade-in"
+                  className="group rounded-2xl overflow-hidden aspect-video relative text-left border border-slate-200/90 shadow-xs focus:outline-hidden hover:shadow-[0_20px_40px_-15px_rgba(225,6,0,0.15)] hover:border-slate-300 hover:-translate-y-1.5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 >
+                  <span className="absolute top-0 left-0 w-0 h-[2.5px] bg-[#e10600] group-hover:w-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-30"></span>
                   <img
                     src="https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&auto=format&fit=crop&q=80"
                     alt="Lifestyle department"
-                    className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/30 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
                   <div className="absolute bottom-5 left-5 text-white">
-                    <span className="text-[10px] uppercase tracking-wider font-extrabold text-blue-300">Modern Living</span>
-                    <h3 className="text-base sm:text-lg font-extrabold mt-0.5">Drinkware & Hydration</h3>
-                    <span className="text-xs font-semibold text-slate-200 mt-2 flex items-center gap-1 group-hover:text-blue-200">
-                      Shop Collection <ChevronRight className="w-3.5 h-3.5" />
+                    <span className="text-[10px] uppercase tracking-wider font-black text-red-300">Modern Living</span>
+                    <h3 className="text-base sm:text-lg font-black mt-0.5 font-display">Drinkware & Hydration</h3>
+                    <span className="text-xs font-semibold text-slate-200 mt-2 flex items-center gap-1 group-hover:text-red-200 transition-colors">
+                      Shop Collection <ChevronRight className="w-3.5 h-3.5 text-[#e10600] group-hover:translate-x-1.5 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]" />
                     </span>
                   </div>
-                </button>
+                </motion.button>
 
                 {/* Stationery Card */}
-                <button
+                <motion.button
+                  initial={{ opacity: 0, y: 25 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.65, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
                   onClick={() => handleExploreFromPromo('Stationery')}
-                  className="group rounded-2xl overflow-hidden aspect-video relative text-left border border-slate-200 shadow-xs focus:outline-hidden hover:shadow-lg transition-all animate-in fade-in"
+                  className="group rounded-2xl overflow-hidden aspect-video relative text-left border border-slate-200/90 shadow-xs focus:outline-hidden hover:shadow-[0_20px_40px_-15px_rgba(225,6,0,0.15)] hover:border-slate-300 hover:-translate-y-1.5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 >
+                  <span className="absolute top-0 left-0 w-0 h-[2.5px] bg-[#e10600] group-hover:w-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-30"></span>
                   <img
                     src="https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=600&auto=format&fit=crop&q=80"
                     alt="Stationery department"
-                    className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/30 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
                   <div className="absolute bottom-5 left-5 text-white">
-                    <span className="text-[10px] uppercase tracking-wider font-extrabold text-blue-300">Creative Stationery</span>
-                    <h3 className="text-base sm:text-lg font-extrabold mt-0.5">Notebooks & Journals</h3>
-                    <span className="text-xs font-semibold text-slate-200 mt-2 flex items-center gap-1 group-hover:text-blue-200">
-                      Shop Collection <ChevronRight className="w-3.5 h-3.5" />
+                    <span className="text-[10px] uppercase tracking-wider font-black text-red-300">Creative Stationery</span>
+                    <h3 className="text-base sm:text-lg font-black mt-0.5 font-display">Notebooks & Journals</h3>
+                    <span className="text-xs font-semibold text-slate-200 mt-2 flex items-center gap-1 group-hover:text-red-200 transition-colors">
+                      Shop Collection <ChevronRight className="w-3.5 h-3.5 text-[#e10600] group-hover:translate-x-1.5 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]" />
                     </span>
                   </div>
-                </button>
+                </motion.button>
               </div>
             </section>
 
@@ -402,25 +459,46 @@ export default function App() {
               onExplore={handleExploreFromPromo}
             />
 
+            {/* CRO Trending Product Bundle Widget */}
+            {comparisonMode === 'optimized' && (
+              <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+                <FrequentlyBoughtTogether
+                  primaryProduct={PRODUCTS[0]}
+                  bundleProduct={PRODUCTS[2]}
+                  onAddBundleToCart={handleAddBundleToCart}
+                />
+              </section>
+            )}
+
             {/* Quick Best Sellers Grid for homepage engagement */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10 border-b border-slate-200 pb-5">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10 border-b border-slate-200 pb-5"
+              >
                 <div className="text-center sm:text-left">
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Trending Items Right Now</h2>
-                  <p className="text-xs text-slate-500 mt-1 font-medium">Bestselling organic apparel and modular stationery loved by our global community.</p>
+                  <div className="inline-flex items-center gap-2 mb-1 text-[10px] font-mono tracking-[0.2em] uppercase text-slate-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e10600] animate-ping"></span>
+                    <span>LIVE VELOCITY</span>
+                  </div>
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight font-display">Trending Items Right Now</h2>
+                  <p className="text-xs text-slate-500 mt-1 font-normal">Bestselling organic apparel and modular stationery loved by our global community.</p>
                 </div>
                 <button
                   onClick={() => {
                     handleClearAllFilters();
                     setCurrentPage('shop');
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs font-extrabold tracking-wide uppercase text-blue-600 hover:text-blue-800 transition-colors"
+                  className="inline-flex items-center gap-2 text-xs font-black tracking-wider uppercase text-slate-900 hover:text-[#e10600] transition-colors duration-300 group"
                   id="view-all-merch-btn"
                 >
                   <span>View Full Catalog</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4 text-[#e10600] group-hover:translate-x-1.5 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]" />
                 </button>
-              </div>
+              </motion.div>
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                 {PRODUCTS.slice(0, 4).map((product) => (
@@ -436,23 +514,35 @@ export default function App() {
               </div>
             </section>
 
-            {/* Trust Badges Bar */}
-            <section className="bg-slate-900 text-white py-12 px-6 border-t border-slate-800">
-              <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center sm:text-left">
-                <div className="space-y-2 max-w-sm mx-auto sm:mx-0">
-                  <span className="text-blue-400 font-bold uppercase text-[10px] tracking-widest block">Carbon Neutral</span>
-                  <h4 className="text-base font-extrabold tracking-tight">Eco-Standard Deliveries</h4>
-                  <p className="text-xs text-slate-300 leading-relaxed font-medium">We offset 100% of greenhouse gases from shipping so your carbon print remains strictly pristine.</p>
+            {/* Trust Badges Bar (Ferrari Performance Dark Finish) */}
+            <section className="bg-[#0a0a0c] text-white py-14 px-6 border-t border-slate-800 relative overflow-hidden">
+              {/* Subtle speed glow background */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(225,6,0,0.08)_0%,transparent_60%)] pointer-events-none"></div>
+
+              <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center sm:text-left relative z-10">
+                <div className="space-y-2.5 max-w-sm mx-auto sm:mx-0 p-4 rounded-xl hover:bg-white/5 transition-all duration-300">
+                  <div className="flex items-center gap-2 justify-center sm:justify-start">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e10600] animate-pulse"></span>
+                    <span className="text-red-400 font-black uppercase text-[10px] tracking-widest block font-mono">Carbon Neutral</span>
+                  </div>
+                  <h4 className="text-base font-black tracking-tight font-display text-white">Eco-Standard Deliveries</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed font-normal">We offset 100% of greenhouse gases from shipping so your carbon print remains strictly pristine.</p>
                 </div>
-                <div className="space-y-2 max-w-sm mx-auto sm:mx-0 border-y md:border-y-0 md:border-x border-slate-800 py-6 md:py-0 md:px-8">
-                  <span className="text-blue-400 font-bold uppercase text-[10px] tracking-widest block">Bespoke Quality</span>
-                  <h4 className="text-base font-extrabold tracking-tight">Reinforced French Terry</h4>
-                  <p className="text-xs text-slate-300 leading-relaxed font-medium">We design with raw organic cotton loops and premium stitching designed to handle thousands of wash cycles.</p>
+                <div className="space-y-2.5 max-w-sm mx-auto sm:mx-0 border-y md:border-y-0 md:border-x border-slate-800/80 py-6 md:py-4 md:px-8 p-4 rounded-xl hover:bg-white/5 transition-all duration-300">
+                  <div className="flex items-center gap-2 justify-center sm:justify-start">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e10600] animate-pulse"></span>
+                    <span className="text-red-400 font-black uppercase text-[10px] tracking-widest block font-mono">Bespoke Quality</span>
+                  </div>
+                  <h4 className="text-base font-black tracking-tight font-display text-white">Reinforced French Terry</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed font-normal">We design with raw organic cotton loops and premium stitching designed to handle thousands of wash cycles.</p>
                 </div>
-                <div className="space-y-2 max-w-sm mx-auto sm:mx-0">
-                  <span className="text-blue-400 font-bold uppercase text-[10px] tracking-widest block">Complete Trust</span>
-                  <h4 className="text-base font-extrabold tracking-tight">30-Day Flexible Return Window</h4>
-                  <p className="text-xs text-slate-300 leading-relaxed font-medium">Changed your mind? We provide pre-paid postage labels for immediate, hassle-free exchanges with no questions asked.</p>
+                <div className="space-y-2.5 max-w-sm mx-auto sm:mx-0 p-4 rounded-xl hover:bg-white/5 transition-all duration-300">
+                  <div className="flex items-center gap-2 justify-center sm:justify-start">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e10600] animate-pulse"></span>
+                    <span className="text-red-400 font-black uppercase text-[10px] tracking-widest block font-mono">Complete Trust</span>
+                  </div>
+                  <h4 className="text-base font-black tracking-tight font-display text-white">30-Day Flexible Return Window</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed font-normal">Changed your mind? We provide pre-paid postage labels for immediate, hassle-free exchanges with no questions asked.</p>
                 </div>
               </div>
             </section>
@@ -801,8 +891,11 @@ export default function App() {
       </main>
 
       {/* Footer block */}
-      <footer className="bg-slate-900 text-slate-400 py-16 px-6 font-sans border-t border-slate-800" id="site-footer">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+      <footer className="bg-[#070709] text-slate-400 py-16 sm:py-20 px-6 font-sans border-t border-slate-800/80 relative overflow-hidden" id="site-footer">
+        {/* Subtle Ferrari red telemetry background glow */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-[radial-gradient(circle,rgba(225,6,0,0.04)_0%,transparent_70%)] pointer-events-none"></div>
+
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 relative z-10">
           
           {/* Brand Info */}
           <div className="space-y-4 text-xs">
@@ -813,38 +906,42 @@ export default function App() {
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
               </svg>
-              <span className="text-base font-bold text-white tracking-tight">Google Merch</span>
+              <span className="text-base font-black text-white tracking-tight font-display">Google Merch</span>
             </div>
-            <p className="text-gray-400 leading-relaxed font-medium">
+            <p className="text-slate-400 leading-relaxed font-normal">
               A high-fidelity UX design prototype and sandbox developed for e-commerce conversion, trust optimization, and user testing.
             </p>
-            <div className="text-[10px] text-gray-500 font-bold">
+            <div className="text-[10px] text-slate-500 font-bold font-mono">
               © 2026 Google Merch Shop. All rights reserved.
             </div>
           </div>
 
           {/* Quick Departments Links */}
           <div className="space-y-3.5 text-xs">
-            <h4 className="text-white font-extrabold uppercase tracking-wider text-[11px]">Departments</h4>
-            <ul className="space-y-2 font-medium">
+            <h4 className="text-white font-black uppercase tracking-wider text-[11px] font-mono">Departments</h4>
+            <ul className="space-y-2 font-normal">
               <li>
-                <button onClick={() => handleExploreFromPromo('Apparel')} className="hover:text-white transition-colors focus:outline-hidden">
-                  Apparel & Fashion Accessories
+                <button onClick={() => handleExploreFromPromo('Apparel')} className="hover:text-white hover:translate-x-1 transition-all duration-200 focus:outline-hidden inline-flex items-center gap-1 group">
+                  <span className="text-[#e10600] opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                  <span>Apparel & Fashion Accessories</span>
                 </button>
               </li>
               <li>
-                <button onClick={() => handleExploreFromPromo('Lifestyle')} className="hover:text-white transition-colors focus:outline-hidden">
-                  Hydration & Drinkware Mugs
+                <button onClick={() => handleExploreFromPromo('Lifestyle')} className="hover:text-white hover:translate-x-1 transition-all duration-200 focus:outline-hidden inline-flex items-center gap-1 group">
+                  <span className="text-[#e10600] opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                  <span>Hydration & Drinkware Mugs</span>
                 </button>
               </li>
               <li>
-                <button onClick={() => handleExploreFromPromo('Stationery')} className="hover:text-white transition-colors focus:outline-hidden">
-                  Eco-friendly Notebooks & Pens
+                <button onClick={() => handleExploreFromPromo('Stationery')} className="hover:text-white hover:translate-x-1 transition-all duration-200 focus:outline-hidden inline-flex items-center gap-1 group">
+                  <span className="text-[#e10600] opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                  <span>Eco-friendly Notebooks & Pens</span>
                 </button>
               </li>
               <li>
-                <button onClick={() => handleExploreFromPromo('Sale')} className="hover:text-white text-rose-450 transition-colors focus:outline-hidden">
-                  Exclusive Sale Clearance Grid
+                <button onClick={() => handleExploreFromPromo('Sale')} className="hover:text-white text-rose-400 hover:translate-x-1 transition-all duration-200 focus:outline-hidden inline-flex items-center gap-1 group">
+                  <span className="text-[#e10600] opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                  <span>Exclusive Sale Clearance Grid</span>
                 </button>
               </li>
             </ul>
@@ -852,30 +949,45 @@ export default function App() {
 
           {/* Support Links */}
           <div className="space-y-3.5 text-xs">
-            <h4 className="text-white font-extrabold uppercase tracking-wider text-[11px]">Shopping Support</h4>
-            <ul className="space-y-2 font-medium">
-              <li className="hover:text-white cursor-pointer transition-colors">Flexible Returns & Exchange</li>
-              <li className="hover:text-white cursor-pointer transition-colors">Standard Carbon-Offset Shipping</li>
-              <li className="hover:text-white cursor-pointer transition-colors">Sustainability Certifications</li>
-              <li className="hover:text-white cursor-pointer transition-colors">Frequently Asked Questions (FAQ)</li>
-              <li className="hover:text-white cursor-pointer transition-colors">Submit Store Feedback</li>
+            <h4 className="text-white font-black uppercase tracking-wider text-[11px] font-mono">Shopping Support</h4>
+            <ul className="space-y-2 font-normal">
+              <li className="hover:text-white hover:translate-x-1 cursor-pointer transition-all duration-200 inline-flex items-center gap-1 group">
+                <span className="text-[#e10600] opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                <span>Flexible Returns & Exchange</span>
+              </li>
+              <li className="hover:text-white hover:translate-x-1 cursor-pointer transition-all duration-200 inline-flex items-center gap-1 group">
+                <span className="text-[#e10600] opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                <span>Standard Carbon-Offset Shipping</span>
+              </li>
+              <li className="hover:text-white hover:translate-x-1 cursor-pointer transition-all duration-200 inline-flex items-center gap-1 group">
+                <span className="text-[#e10600] opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                <span>Sustainability Certifications</span>
+              </li>
+              <li className="hover:text-white hover:translate-x-1 cursor-pointer transition-all duration-200 inline-flex items-center gap-1 group">
+                <span className="text-[#e10600] opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                <span>Frequently Asked Questions (FAQ)</span>
+              </li>
+              <li className="hover:text-white hover:translate-x-1 cursor-pointer transition-all duration-200 inline-flex items-center gap-1 group">
+                <span className="text-[#e10600] opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                <span>Submit Store Feedback</span>
+              </li>
             </ul>
           </div>
 
           {/* Contact Details / Newsletter */}
           <div className="space-y-3.5 text-xs">
-            <h4 className="text-white font-extrabold uppercase tracking-wider text-[11px]">Newsletter Updates</h4>
-            <p className="text-slate-400 leading-normal font-medium">Subscribe to receive first-access alerts on exclusive collaborative designer collections.</p>
+            <h4 className="text-white font-black uppercase tracking-wider text-[11px] font-mono">Newsletter Updates</h4>
+            <p className="text-slate-400 leading-normal font-normal">Subscribe to receive first-access alerts on exclusive collaborative designer collections.</p>
             <div className="flex gap-2">
               <input
                 type="email"
                 placeholder="yashgoradia045@gmail.com"
-                className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-hidden focus:border-blue-500 flex-1 outline-hidden"
+                className="bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-hidden focus:border-[#e10600] flex-1 outline-hidden transition-colors"
                 disabled
               />
               <button
                 onClick={() => alert('Newsletter simulated! Thank you.')}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3.5 rounded-lg text-[10px] uppercase tracking-wider transition-colors shadow-md"
+                className="bg-gradient-to-r from-[#e10600] to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-black py-2.5 px-4 rounded-xl text-[10px] uppercase tracking-widest transition-all duration-300 hover:shadow-[0_0_20px_rgba(225,6,0,0.4)]"
               >
                 Join
               </button>
@@ -892,6 +1004,9 @@ export default function App() {
         onUpdateQuantity={handleUpdateCartQuantity}
         onRemoveItem={handleRemoveFromCart}
         onClearCart={handleClearCart}
+        onOpenCheckoutModal={() => setIsCheckoutOpen(true)}
+        promoCodeApplied={promoCodeApplied}
+        onApplyPromoCode={(code) => setPromoCodeApplied(code)}
       />
 
       {/* Wishlist Drawer Component */}
@@ -901,6 +1016,36 @@ export default function App() {
         wishlistItems={wishlist}
         onRemoveFromWishlist={handleToggleWishlist}
         onAddToCart={handleAddToCart}
+      />
+
+      {/* Persistent Floating Bottom Quick-Add / Checkout Bar in Optimized Mode */}
+      {comparisonMode === 'optimized' && (
+        <FloatingCartBar
+          cartItems={cart}
+          onOpenCart={() => setIsCartOpen(true)}
+          onOpenCheckout={() => setIsCheckoutOpen(true)}
+          promoCodeApplied={promoCodeApplied}
+        />
+      )}
+
+      {/* 1-Page Express Guest Checkout Modal */}
+      <ExpressCheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        cartItems={cart}
+        onClearCart={handleClearCart}
+        promoCodeApplied={promoCodeApplied}
+      />
+
+      {/* Exit-Intent Recapture Modal */}
+      <ExitIntentModal
+        isOpen={isExitIntentOpen}
+        onClose={() => setIsExitIntentOpen(false)}
+        onApplyDiscount={(code) => {
+          setPromoCodeApplied(code);
+          setIsCartOpen(true);
+        }}
+        cartItemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
       />
 
       {/* Floating Design Testing Control Center Panel */}

@@ -51,12 +51,13 @@ export default function Header({
         </div>
       </div>
 
-      {/* Google 4-Color Accent Stripe */}
-      <div className="h-[3px] w-full flex" id="google-accent-stripe">
+      {/* Google 4-Color Accent Stripe with Speed Shimmer */}
+      <div className="h-[3px] w-full flex relative overflow-hidden" id="google-accent-stripe">
         <div className="bg-[#4285F4] flex-1"></div>
         <div className="bg-[#EA4335] flex-1"></div>
         <div className="bg-[#FBBC05] flex-1"></div>
         <div className="bg-[#34A853] flex-1"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent w-36 animate-ferrari-shimmer pointer-events-none"></div>
       </div>
 
       {/* Main Header Row */}
